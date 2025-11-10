@@ -63,6 +63,22 @@ return [
             ]) : [],
         ],
 
+        'bukukas' => [
+            'driver' => env('DB_BUKUKAS_CONNECTION', 'mysql'),
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_BUKUKAS_HOST', '127.0.0.1'),
+            'port' => env('DB_BUKUKAS_PORT', '3306'),
+            'database' => env('DB_BUKUKAS_DATABASE', 'forge'),
+            'username' => env('DB_BUKUKAS_USERNAME', 'forge'),
+            'password' => env('DB_BUKUKAS_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
