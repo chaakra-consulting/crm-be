@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             // $table->foreignId('company_id')->nullable()->constrained('companies')->nullOnDelete()->cascadeOnUpdate();
-            $table->unsignedBigInteger('company_id')->nullable()->index();
+            // $table->unsignedBigInteger('company_id')->nullable()->index();
+            $table->foreignId('company_id')->nullable()->constrained('companies')->nullOnDelete()->cascadeOnUpdate();
             $table->foreignId('source_id')->nullable()->constrained('sources')->nullOnDelete()->cascadeOnUpdate();
             $table->foreignId('owner_user_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             // $table->foreignId('tags_id')->nullable()->constrained('tags')->nullOnDelete()->cascadeOnUpdate();
             $table->string('name');
+            $table->string('photo')->nullable();
             $table->string('title_name')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->string('phone_number_1')->nullable();

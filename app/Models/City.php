@@ -22,7 +22,15 @@ class City extends Model
      * @var array<int, string>
      */
     protected $guarded = ['id'];
-    
+
+    public function scopeFilterProvince($query, $provinceId)
+    {
+        if ($provinceId) {
+            $query->where('province_id', $provinceId);
+        }
+        return $query;
+    }
+
     /**
      * Relasi ke provinsi
      */

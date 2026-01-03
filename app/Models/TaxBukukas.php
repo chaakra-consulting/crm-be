@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model
+class TaxBukukas extends Model
 {
     use HasFactory;
 
@@ -14,7 +14,9 @@ class Role extends Model
      *
      * @var string
      */
-    protected $table = 'roles';
+    protected $connection = 'bukukas';
+    protected $table = 'taxes';
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -22,9 +24,4 @@ class Role extends Model
      * @var array<int, string>
      */
     protected $guarded = ['id'];
-
-    public function users()
-    {
-        return $this->hasMany(User::class);
-    }
 }

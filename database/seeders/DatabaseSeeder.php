@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             ProvinceCitySeeder::class,
             SourceSeeder::class,
+            SocialMediaSeeder::class,
+            CompanySyncSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

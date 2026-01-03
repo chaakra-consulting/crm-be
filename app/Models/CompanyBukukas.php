@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Role extends Model
+class CompanyBukukas extends Model
 {
     use HasFactory;
 
@@ -14,7 +14,9 @@ class Role extends Model
      *
      * @var string
      */
-    protected $table = 'roles';
+    protected $connection = 'bukukas';
+    protected $table = 'master_customers';
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -23,8 +25,10 @@ class Role extends Model
      */
     protected $guarded = ['id'];
 
-    public function users()
+    public function local()
     {
-        return $this->hasMany(User::class);
+        $instance = $this->hasOne(Company::class, 'company_bukukas_id');
+        $instance->getRelated()->setConnection(config('database.default'));
+        return $instance;
     }
 }

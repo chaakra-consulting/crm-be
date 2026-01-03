@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Role extends Model
+class ProjectItemsBukukas extends Model
 {
     use HasFactory;
 
@@ -14,7 +14,9 @@ class Role extends Model
      *
      * @var string
      */
-    protected $table = 'roles';
+    protected $connection = 'bukukas';
+    protected $table = 'sales_invoices_items';
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -23,8 +25,9 @@ class Role extends Model
      */
     protected $guarded = ['id'];
 
-    public function users()
+    public function salesInvoice()
     {
-        return $this->hasMany(User::class);
+        $instance = $this->belongsTo(ProjectBukukas::class, 'fid_invoices');
+        return $instance;
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Remappers;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -24,13 +26,18 @@ class AuthController extends Controller
             'password' => Hash::make($validatedData['password']),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $plainToken = $user->createToken('auth_token')->plainTextToken;
+
+        $tokenModel = $user->tokens()->latest()->first();
+        $tokenModel->expires_at = Carbon::now()->addHours(10);
+        $tokenModel->save();
 
         return response()->json([
             'status' => 'success',
             'message' => 'User registered successfully',
             'user' => $user,
-            'token' => $token
+            'token' => $plainToken,
+            'expires_at' => $tokenModel->expires_at,
         ], 201);
     }
 
@@ -41,26 +48,32 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Cek apakah user ada
-        $user = User::where('email', $credentials['email'])->first();
+        // Cek user
+        $user = User::where('is_active',true)->where('email', $credentials['email'])->first();
 
-        // Validasi password
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => ['Email atau Password Salah.'],
             ]);
         }
 
-        // Buat token baru
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // $user->tokens()->delete();
+
+        $plainToken = $user->createToken('auth_token')->plainTextToken;
+
+        $tokenModel = $user->tokens()->latest()->first();
+        $tokenModel->expires_at = Carbon::now()->addHours(10);
+        $tokenModel->save();
+
+        $remapUser = Remappers::remapUser($user);
 
         return response()->json([
             'message' => 'Login successful.',
-            'user' => $user,
-            'token' => $token,
+            'user' => $remapUser,
+            'token' => $plainToken,
+            'expires_at' => $tokenModel->expires_at,
         ]);
     }
-
     /**
      * Logout user
      */

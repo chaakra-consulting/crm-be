@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contact_tags', function (Blueprint $table) {
+        Schema::create('contact_social_medias', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contact_id')->nullable()->constrained('contacts')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('tag_id')->nullable()->constrained('tags')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('contact_id')->nullable()->constrained('contacts')->cascadeOnUpdate();
+            $table->foreignId('social_media_id')->nullable()->constrained('social_medias')->cascadeOnUpdate();
+            $table->string('detail')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contact_tags');
+        Schema::dropIfExists('contact_social_medias');
     }
 };

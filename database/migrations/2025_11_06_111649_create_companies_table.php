@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contact_tags', function (Blueprint $table) {
+        Schema::create('companies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contact_id')->nullable()->constrained('contacts')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('tag_id')->nullable()->constrained('tags')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->unsignedBigInteger('company_bukukas_id')->nullable()->index();
+            $table->unsignedBigInteger('pic_contact_id')->nullable()->index();
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contact_tags');
+        Schema::dropIfExists('companies');
     }
 };

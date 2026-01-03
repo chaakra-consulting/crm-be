@@ -17,20 +17,26 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->timestamps();
         });
-        
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('role_id')->nullable()->constrained('roles')->cascadeOnUpdate();
+            $table->unsignedBigInteger('sdm_user_id')->nullable()->index();
+
             $table->string('name')->nullable();
             $table->string('username')->nullable()->unique();
             $table->string('email')->unique();
+            $table->string('phone_number')->nullable();
+            $table->string('title')->nullable();
+            $table->string('photo')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->string('email_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
-        
+
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

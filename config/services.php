@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'sdm' => [
+        'url' => env('API_SDM_URL'),
+    ],
+
 ];

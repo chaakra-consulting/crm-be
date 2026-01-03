@@ -15,9 +15,11 @@ class User extends Authenticatable
         'role_id',
         'name',
         'email',
+        'email_verified_at',
         'username',
         'password',
         'is_active',
+        'photo',
     ];
 
     protected $hidden = [
@@ -37,6 +39,36 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function scopeFilterDateRange($query, $start, $end)
+    {
+        if ($start && $end) {
+            $query->whereBetween('created_at', [$start, $end]);
+        }
+        return $query;
+    }
+
+    public function scopeFilterRole($query, $slug)
+    {
+        if ($slug) {
+            $query->whereHas('role', function ($q) use ($slug) {
+                $q->where('slug', $slug);
+            });
+        }
+        return $query;
+    }
+
+    public function scopeFilterRoles($query, $slugs)
+    {
+        if (!empty($slugs)) {
+            $query->whereHas('role', function ($q) use ($slugs) {
+                $q->whereIn('slug', (array) $slugs);
+            });
+        }
+
+        return $query;
+    }
+
 
     public function role()
     {
