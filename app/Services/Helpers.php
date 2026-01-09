@@ -246,6 +246,9 @@ class Helpers
             case 'waiting-approval':
                 return 'Menunggu Persetujuan';
 
+            case 'approval-done':
+                return 'Pengajuan Selesai';
+
             case 'on-progress':
                 return 'Sedang Diproses';
 

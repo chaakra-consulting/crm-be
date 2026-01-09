@@ -35,12 +35,6 @@ class ContactService
                 ? Company::where('company_bukukas_id', $data['company_id'])->first()
                 : null;
 
-            // Upload photo
-            if ($photo) {
-                $path = $photo->store('contacts', 'public');
-                $user->update(['photo' => $path]);
-            }
-
             // Create contact
             $contact = Contact::create([
                 'user_id'         => $user->id,
@@ -56,6 +50,14 @@ class ContactService
                 'province_id'     => $data['province_id'] ?? null,
                 'city_id'         => $data['city_id'] ?? null,
             ]);
+
+            // Upload photo
+            if ($photo) {
+                $path = $photo->store('contacts', 'public');
+                $user->update(['photo' => $path]);
+                $contact->update(['photo' => $path]);
+            }
+
 
             // Handle tags
             if (!empty($data['tags'])) {

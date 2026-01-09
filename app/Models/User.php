@@ -13,12 +13,14 @@ class User extends Authenticatable
 
     protected $fillable = [
         'role_id',
+        'sdm_user_id',
         'name',
         'email',
         'email_verified_at',
         'username',
         'password',
         'is_active',
+        'email_token',
         'photo',
     ];
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendAccActivationEmailJob;
 use App\Models\Company;
 use App\Models\Contact;
 use App\Models\ContactSocialMedia;
@@ -258,6 +259,30 @@ class ContactController extends Controller
 
         return response()->json([
             'message' => 'Contact deleted successfully.'
+        ]);
+    }
+
+    public function sendAccActivationEmail($userId): JsonResponse
+    {
+        $user = User::findOrFail($userId);
+
+        if (!$user->email) {
+            return response()->json([
+                'message' => 'User tidak memiliki email. Isikan email terlebih dahulu.'
+            ], 422);
+        }
+
+        if (empty($user->email_token)) {
+            $user->update([
+                'email_token' => Str::uuid()->toString(),
+            ]);
+        }
+
+        // Dispatch ke queue
+        SendAccActivationEmailJob::dispatch($user);
+
+        return response()->json([
+            'message' => 'Email aktivasi berhasil diantrikan'
         ]);
     }
 }

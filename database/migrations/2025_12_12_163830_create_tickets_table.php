@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger('project_id')->nullable();
 
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
-            $table->enum('status', ['open', 'waiting-approval', 'on-progress', 'customer-reply','pending','resolved','closed','reopened','rejected'])->default('open');
+            $table->enum('status', ['open', 'waiting-approval', 'approval-done','on-progress', 'customer-reply','pending','resolved','closed','reopened','rejected'])->default('open');
             $table->enum('type', ['support', 'complaint', 'question'])->default('support');
 
             $table->timestamps();

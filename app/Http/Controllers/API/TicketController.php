@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
+use App\Models\User;
 use App\Services\Helpers;
 use App\Services\Remappers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TicketController extends Controller
 {
@@ -209,6 +212,50 @@ class TicketController extends Controller
         }
     }
 
+    public function updateApprovalDone(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'status'            => 'required|in:approve,reject',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $ticket = Ticket::findOrFail($id);
+
+            switch ($request->status) {
+                case 'approve':
+                    $newStatus = 'closed';
+                    break;
+                case 'reject':
+                    $newStatus = 'on-progress';
+                    break;
+                default:
+                    throw new \Exception('Status tidak valid.');
+            }
+            $ticket->update([
+                "status"            => $newStatus,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Tiket berhasil diupdate.',
+                'data'    => $ticket,
+            ], 201);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Gagal Mengubah Data Tiket.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function updateApproval(Request $request, $id): JsonResponse
     {
         $request->validate([
@@ -231,13 +278,50 @@ class TicketController extends Controller
                 $newStatus = 'rejected';
             }
 
+            $finalType = $request->type ?? $ticket->type;
+
             $ticket->update([
-                "status"            => $newStatus,
-                "type"              => $request->type ?? $ticket->type,
-                "priority"          => $request->priority ?? $ticket->priority,
-                "assigned_user_id"  => $request->assigned_user_id ?? null,
-                "answer"            => $request->answer ?? null,
+                'status'           => $newStatus,
+                'type'             => $finalType,
+                'priority'         => $request->priority ?? $ticket->priority,
+                'assigned_user_id' => $request->assigned_user_id,
+                'answer'           => $request->answer,
             ]);
+
+            if ($finalType === 'complaint') {
+
+                $project = $ticket->project;
+                if (! $project) {
+                    throw new \Exception('Projek tidak ditemukan.');
+                }
+
+                $user = User::find($request->assigned_user_id);
+                if (! $user) {
+                    throw new \Exception('User penanggung jawab tidak ditemukan.');
+                }
+
+                if (! $user->sdm_user_id) {
+                    throw new \Exception('User belum diintegrasikan dengan Sistem SDM.');
+                }
+
+                $response = Http::post(
+                    config('services.sdm.url') . '/tasks/store',
+                    [
+                        'user_id'            => $user->sdm_user_id,
+                        'tipe_task'          => 'task-project',
+                        'project_bukukas_id' => $project->project_bukukas_id,
+                        'nama_task'          => 'Helpdesk Complaint CRM - ' . $ticket->title,
+                        'keterangan'         => $ticket->description, // ubah kolom tasks di sdm jadi teks supaya char nya bisa banyak
+                        'tgl_task'           => now()->toDateString(),
+                        'deadline_task'      => now()->addDays(2)->toDateString(),
+                    ]
+                );
+
+                if (! $response->successful()) {
+                    throw new \Exception('Gagal membuat task complaint di SDM');
+                }
+            }
+
 
             DB::commit();
 

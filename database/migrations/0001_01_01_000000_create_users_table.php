@@ -32,7 +32,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->string('email_token')->nullable();
+            $table->string('email_token')->nullable()->unique();
             $table->rememberToken();
             $table->timestamps();
         });

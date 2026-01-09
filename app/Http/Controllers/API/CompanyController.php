@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\Log;
 
 class CompanyController extends Controller
 {
+    public function __construct(
+        protected ContactService $contactService,
+    ) {
+    }
     /**
      * Display a listing of the resource.
      */
@@ -33,7 +37,7 @@ class CompanyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, ContactService $contactService): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
             'name'   => 'required|string|max:255',
@@ -99,27 +103,35 @@ class CompanyController extends Controller
 
             if ($request->pic_contact_id === 'new') {
 
+                $hasAddress = filter_var($newContact['has_address'] ?? false, FILTER_VALIDATE_BOOLEAN);
                 $newContact = $request->input('new_contact');
                 $tagsFormat = Helpers::tagsStringToArray($newContact['tags']);
                 $newContact['tags'] = $tagsFormat;
 
                 $newContact['company_id'] = $company->id;
-                $newContact['source_id']?: null;
 
-                if (empty($newContact['has_address'] == true)) {
+                if (
+                    !isset($newContact['source_id']) ||
+                    $newContact['source_id'] === 'undefined' ||
+                    $newContact['source_id'] === ''
+                ) {
+                    $newContact['source_id'] = null;
+                }
+
+                if (!$hasAddress) {
                     $newContact['address']     = $request->address;
                     $newContact['province_id'] = $request->province_id;
                     $newContact['city_id']     = $request->city_id;
                 }
 
-                $contact = $contactService->createContact(
+                $contact = $this->contactService->createContact(
                     $newContact,
-                    $company->id
+                    $request->photo
                 );
 
                 $picContactId = $contact->id;
             }else{
-                $contactService->setCompanyId($picContactId, $local->id);
+                $this->contactService->setCompanyId($picContactId, $local->id);
             }
 
             $local->update([
@@ -155,7 +167,7 @@ class CompanyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id, ContactService $contactService): JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
         $request->validate([
             'name'   => 'required|string|max:255',
@@ -251,11 +263,11 @@ class CompanyController extends Controller
                     $newContact['city_id']     = $request->city_id;
                 }
 
-                $contact = $contactService->createContact($newContact);
+                $contact = $this->contactService->createContact($newContact);
 
                 $picContactId = $contact->id;
             }else{
-                $contactService->setCompanyId($picContactId, $company->id);
+                $this->contactService->setCompanyId($picContactId, $company->id);
             }
 
             $company->update([

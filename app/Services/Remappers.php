@@ -6,24 +6,6 @@ use Carbon\Carbon;
 
 class Remappers
 {
-    public static function remapUser($user)
-    {
-        // $source = Source::get();
-        return [
-            "id" => $user->id,
-            "role_id" => $user->role_id,
-            "role_slug" => $user->role?->slug,
-            "name" => $user->name,
-            "username" => $user->username,
-            "email" => $user->email,
-            "photo" => $user->photo ? url('storage/' . $user->photo) : null,
-            "email_verified_at" => $user->email_verified_at,
-            "is_active" => $user->is_active,
-            "created_at" => $user->created_at,
-            "updated_at" => $user->updated_at,
-        ];
-    }
-
     public function remapContacts($contacts)
     {
         // $source = Source::get();
@@ -34,6 +16,7 @@ class Remappers
             'phone_number_1'  => $item->phone_number_1,
             'phone_number_2'  => $item->phone_number_2,
             'email'           => $item->user?->email,
+            'email_token'     => $item->user?->token,
             'address'         => $item->address,
             'date_of_birth'   => $item->date_of_birth,
             'company_id'      => $item->company?->company_bukukas_id,
@@ -114,14 +97,29 @@ class Remappers
         ]);
     }
 
-    public function remapUsers($users)
+
+    public function mapUserActivationItem($item)
     {
-        return collect($users)->map(fn($item) => [
+        return [
+            'id'                => $item->id,
+            'name'              => $item->name,
+            'email_token'       => $item->email_token,
+            'is_active'         => $item->is_active,
+            'is_active_text'    => $item->is_active ? 'Aktif' : 'Tidak Aktif',
+            'photo_path'        => $item->photo ? asset('storage/' . $item->photo) : null,
+            'photo_url'         => $item->photo ? url('storage/' . $item->photo) : null,
+        ];
+    }
+
+    public function mapUserItem($item)
+    {
+        return [
             'id'                => $item->id,
             'name'              => $item->name,
             'role_id'           => $item->role_id,
             'role_slug'         => $item->role?->slug,
             'role_name'         => $item->role?->name,
+            "sdm_user_id"       => $item->sdm_user_id,
             'username'          => $item->username,
             'email'             => $item->email,
             'email_verified_at' => $item->email_verified_at,
@@ -130,11 +128,17 @@ class Remappers
             'is_active_text'    => $item->is_active ? 'Aktif' : 'Tidak Aktif',
             'photo_path'        => $item->photo ? asset('storage/' . $item->photo) : null,
             'photo_url'         => $item->photo ? url('storage/' . $item->photo) : null,
+            "photo"             => $item->photo ? url('storage/' . $item->photo) : null,
             'created_at'        => $item->created_at,
             'created_at_format' => $item->created_at ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
             'updated_at'        => $item->updated_at,
             'updated_at_format' => $item->updated_at ? Carbon::parse($item->updated_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
-        ]);
+        ];
+    }
+
+    public function remapUsers($users)
+    {
+        return collect($users)->map(fn($item) => $this->mapUserItem($item));
     }
 
     public function mapProjectItem($item, $withDetail = false)
@@ -250,12 +254,13 @@ class Remappers
             'title'             => $item->title,
             'description'       => $item->description,
             'priority'          => $item->priority ? Helpers::prioritySlugToText($item->priority) : null,
-            'priority_slug'            => $item->priority ? $item->priority : null,
+            'priority_slug'     => $item->priority ? $item->priority : null,
             'status'            => $item->status ? Helpers::statusSlugToText($item->status) : null,
-            'status_slug'            => $item->status ? $item->status : null,
+            'status_slug'       => $item->status ? $item->status : null,
             'type'              => $item->type ? Helpers::typeSlugToText($item->type) : null,
-            'type_slug'            => $item->type ? $item->type : null,
+            'type_slug'         => $item->type ? $item->type : null,
             'project_id'        => $item->project?->id,
+            'project_bukukas_id'=> $item->project?->project_bukukas_id,
             'project_name'      => $item->project?->bukukas?->item?->title,
             'reporter_user_id' => $item->reporterUser?->id,
             'reporter_name'    => $item->reporterUser?->name,

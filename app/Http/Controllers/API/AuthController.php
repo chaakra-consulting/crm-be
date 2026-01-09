@@ -65,7 +65,8 @@ class AuthController extends Controller
         $tokenModel->expires_at = Carbon::now()->addHours(10);
         $tokenModel->save();
 
-        $remapUser = Remappers::remapUser($user);
+        $remapper = new Remappers();
+        $remapUser = $remapper->mapUserItem($user);
 
         return response()->json([
             'message' => 'Login successful.',

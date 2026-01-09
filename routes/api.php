@@ -31,6 +31,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
+Route::get('/users/show/{id?}', [UserController::class, 'show'])->name('users.show');
+Route::put('/users/activate-account/{id}', [UserController::class, 'activateAccount'])->name('users.activate_account');
+
 Route::middleware(['auth:sanctum'])->group(function () {
 
     //cities
@@ -42,6 +45,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/contacts/show/{id}', [ContactController::class, 'show'])->name('contacts.show');
     Route::put('/contacts/update/{id}', [ContactController::class, 'update'])->name('contacts.update');
     Route::delete('/contacts/delete/{id}', [ContactController::class, 'destroy'])->name('contacts.destroy');
+    Route::post('/contacts/activation-email/{userId}', [ContactController::class, 'sendAccActivationEmail']);
 
     //companies
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
@@ -82,8 +86,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/tickets/detail/{id}', [TicketController::class, 'detail'])->name('tickets.detail');
     Route::post('/tickets/store', [TicketController::class, 'store'])->name('tickets.store');
     Route::post('/tickets/store-message/{id}', [TicketController::class, 'storeMessage'])->name('tickets.store_message');
-    Route::put('/tickets/update-status/{id}', [TicketController::class, 'updateStatus'])->name('tickets.update_status');
     Route::put('/tickets/update-approval/{id}', [TicketController::class, 'updateApproval'])->name('tickets.update_approval');
+    Route::put('/tickets/update-approval-done/{id}', [TicketController::class, 'updateApprovalDone'])->name('tickets.update_approval_done');
+    Route::put('/tickets/update-status/{id}', [TicketController::class, 'updateStatus'])->name('tickets.update_status');
 
     // Route::get('/tickets/show/{id}', [TicketController::class, 'show'])->name('tickets.show');
     // Route::put('/tickets/update/{id}', [TicketController::class, 'update'])->name('tickets.update');
@@ -95,5 +100,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/users/update/{id}', [UserController::class, 'update'])->name('users.update');
     Route::put('/users/change-password/{id}', [UserController::class, 'changePassword'])->name('users.change_password');
     Route::delete('/users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/users/index-sdm', [UserController::class, 'indexUserSDM'])->name('users.index_sdm');
+    Route::get('/users/index-user-project', [UserController::class, 'indexUserFromUserSDMByBukukasProject'])->name('users.index_from_sdm_by_bukukas_project');
 
 });

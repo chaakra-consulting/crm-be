@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             SocialMediaSeeder::class,
             CompanySyncSeeder::class,
             UserSeeder::class,
+            ProjectSyncSeeder::class
         ]);
     }
 }
