@@ -30,15 +30,26 @@ class ProjectController extends Controller
         $picCompanyUserId = $roleSlug == 'pic-customer' ? $auth->id : null;
         $picProjectUserId = $roleSlug == 'pic-project' ? $auth->id : null;
 
-        $project = ProjectBukukas::where('deleted',0)
-        ->byPicCompany($picCompanyUserId)
-        ->byPicProject($picProjectUserId)
-        ->latest()->get();
+        $project = ProjectBukukas::where('deleted', 0)
+            ->byPicCompany($picCompanyUserId)
+            ->byPicProject($picProjectUserId)
+            ->latest()->get();
 
         $remapper = new Remappers();
         $remapProjects = $remapper->remapProjects($project);
 
         return response()->json($remapProjects);
+    }
+
+    function projectList()
+    {
+        $project = ProjectBukukas::where('deleted', 0)
+            ->latest()->get();
+
+        $remapper = new Remappers();
+        $remapProjects = $remapper->remapProjects($project);
+
+        return response()->json(['data' => $remapProjects]);
     }
 
     public function detail($id): JsonResponse
@@ -78,7 +89,8 @@ class ProjectController extends Controller
 
         try {
 
-            $project = ProjectBukukas::create([
+            $project = ProjectBukukas::create(
+                [
                     // 'code'              => $bukpot,
                     'spk_code'          => $request->spk_code ?? '',
                     'fid_custt'         => $request->fid_custt, // untuk menyimpan company yg ngerjain (chaakra consulting)
@@ -111,7 +123,8 @@ class ProjectController extends Controller
                 ]
             );
 
-            ProjectItemsBukukas::create([
+            ProjectItemsBukukas::create(
+                [
                     'fid_invoices' => $project->id,
                     'title'        => $request->invoice_item_title,
                     'rate'         => $request->invoice_item_rate,
@@ -132,10 +145,10 @@ class ProjectController extends Controller
             DB::commit();
 
             /**
-            * ============================
-            * SYNC KE SDM
-            * ============================
-            */
+             * ============================
+             * SYNC KE SDM
+             * ============================
+             */
             $responseSdm = Http::asForm()->post(
                 config('services.sdm.url') . '/bukukas-sync/project',
                 [
@@ -158,7 +171,6 @@ class ProjectController extends Controller
                 'message' => 'Project created successfully.',
                 'data' => $project
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -252,7 +264,6 @@ class ProjectController extends Controller
                 'message' => 'Project updated successfully.',
                 'data'    => $project->fresh()
             ], 200);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -264,5 +275,4 @@ class ProjectController extends Controller
             ], 500);
         }
     }
-
 }

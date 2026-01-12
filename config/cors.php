@@ -37,7 +37,10 @@ return [
     */
 
     'allowed_origins' => [
-        env('APP_FRONTEND_URL', 'http://localhost:3000'),
+        '*'
+        // env('APP_FRONTEND_URL', 'http://localhost:3000'),
+        // env('APP_FRONTEND_URL', 'http://localhost:5173'),
+        // 'http://sdm_main.test/*',
     ],
 
     /*

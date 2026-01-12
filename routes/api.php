@@ -34,6 +34,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/users/show/{id?}', [UserController::class, 'show'])->name('users.show');
 Route::put('/users/activate-account/{id}', [UserController::class, 'activateAccount'])->name('users.activate_account');
 
+Route::get('project/list', [ProjectController::class, 'projectList'])->name('projects.list');
+
 Route::middleware(['auth:sanctum'])->group(function () {
 
     //cities
@@ -81,7 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/tags/update/{id}', [TagController::class, 'update'])->name('tags.update');
     Route::delete('/tags/delete/{id}', [TagController::class, 'destroy'])->name('tags.destroy');
 
-        //projects
+    //projects
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/detail/{id}', [TicketController::class, 'detail'])->name('tickets.detail');
     Route::post('/tickets/store', [TicketController::class, 'store'])->name('tickets.store');
@@ -102,5 +104,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/index-sdm', [UserController::class, 'indexUserSDM'])->name('users.index_sdm');
     Route::get('/users/index-user-project', [UserController::class, 'indexUserFromUserSDMByBukukasProject'])->name('users.index_from_sdm_by_bukukas_project');
-
 });
