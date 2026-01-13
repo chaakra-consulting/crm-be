@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Source;
@@ -32,19 +33,19 @@ class Remappers
             'city_id'         => $item->city_id,
             'city_name'       => $item->city?->name,
             'created_at'      => $item->created_at?->format('Y-m-d H:i:s'),
-            'created_at_format'=> $item->created_at ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
+            'created_at_format' => $item->created_at ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
             'photo_path'      => $item->photo ? asset('storage/' . $item->photo) : null,
             'photo_url'      => $item->photo ? url('storage/' . $item->photo) : null,
-            'facebook'         => $item->socialMedias->where('slug','facebook')->first()->pivot->detail ?? null,
-            'twitterx'         => $item->socialMedias->where('slug','twitterx')->first()->pivot->detail ?? null,
-            'instagram'        => $item->socialMedias->where('slug','instagram')->first()->pivot->detail ?? null,
-            'whatsapp'         =>  $item->socialMedias->where('slug','whatsapp')->first()->pivot->detail ?? null,
+            'facebook'         => $item->socialMedias->where('slug', 'facebook')->first()->pivot->detail ?? null,
+            'twitterx'         => $item->socialMedias->where('slug', 'twitterx')->first()->pivot->detail ?? null,
+            'instagram'        => $item->socialMedias->where('slug', 'instagram')->first()->pivot->detail ?? null,
+            'whatsapp'         =>  $item->socialMedias->where('slug', 'whatsapp')->first()->pivot->detail ?? null,
             'tags'            => $item->tags->map(fn($tag) => [
-                                    'id'    => $tag->id,
-                                    'name'  => $tag->name,
-                                    'slug'  => $tag->slug,
-                                    'color' => $tag->color,
-                                ]),
+                'id'    => $tag->id,
+                'name'  => $tag->name,
+                'slug'  => $tag->slug,
+                'color' => $tag->color,
+            ]),
         ]);
     }
 
@@ -86,14 +87,14 @@ class Remappers
             'address'         => $item->address,
             'memo'            => $item->memo,
             'deleted'         => $item->deleted,
-            'pic_contact_id'  => $item->local? $item->local->pic_contact_id : null,
-            'pic_contact_name'=> $item->local && $item->local->picContact ? $item->local->picContact->name : null,
-            'province_id'     => $item->local? $item->local->province_id : null,
+            'pic_contact_id'  => $item->local ? $item->local->pic_contact_id : null,
+            'pic_contact_name' => $item->local && $item->local->picContact ? $item->local->picContact->name : null,
+            'province_id'     => $item->local ? $item->local->province_id : null,
             'province_name'   => $item->local && $item->local->province_id ? $item->province?->name : null,
-            'city_id'         => $item->local? $item->local->city_id : null,
+            'city_id'         => $item->local ? $item->local->city_id : null,
             'city_name'       => $item->local && $item->local->city_id ? $item->city?->name : null,
             'created_at'      => $item->created_at,
-            'created_at_format'=> $item->created_at ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
+            'created_at_format' => $item->created_at ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
         ]);
     }
 
@@ -174,18 +175,18 @@ class Remappers
 
             'inv_date'          => $item->inv_date,
             'inv_date_format'   => $item->inv_date
-                                    ? Carbon::parse($item->inv_date)->locale('id')->translatedFormat('d F Y')
-                                    : null,
+                ? Carbon::parse($item->inv_date)->locale('id')->translatedFormat('d F Y')
+                : null,
 
             'inv_contract_date' => $item->inv_contract_date,
             'inv_contract_date_format' => $item->inv_contract_date
-                                    ? Carbon::parse($item->inv_contract_date)->locale('id')->translatedFormat('d F Y')
-                                    : null,
+                ? Carbon::parse($item->inv_contract_date)->locale('id')->translatedFormat('d F Y')
+                : null,
 
             'created_at'        => $item->created_at,
             'created_at_format' => $item->created_at
-                                    ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s')
-                                    : null,
+                ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s')
+                : null,
 
             'is_verified'       => $item->is_verified,
             'dikirim'           => $item->dikirim,
@@ -207,7 +208,7 @@ class Remappers
 
 
             "status"               => "proses",
-            "progress"             => 40,
+            "progress"             => $local?->progress,
             'invoice_total_summary' => $invoiceTotalSummary,
             'payments'              => $payments,
         ];
@@ -216,7 +217,7 @@ class Remappers
     public function remapProjects($projects)
     {
         // try {
-            return collect($projects)->map(fn($item) => $this->mapProjectItem($item));
+        return collect($projects)->map(fn($item) => $this->mapProjectItem($item));
         // } catch (\Throwable $e) {
         //     dd($e->getMessage(), $e->getLine());
         // }
@@ -233,8 +234,8 @@ class Remappers
             'message'           => $item->message,
             'created_at'        => $item->created_at,
             'created_at_format' => $item->created_at
-                                    ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s')
-                                    : null,
+                ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s')
+                : null,
             'attachments'       => $attachments,
         ];
     }
@@ -243,10 +244,10 @@ class Remappers
     {
         $attachments = $withRelation ? $item->attachments : [];
         $messages = $withRelation ? collect($item->messages)
-                                        ->sortByDesc('created_at')
-                                        ->values()
-                                        ->map(fn ($m) => $this->mapTicketMessage($m))
-                                    : [];
+            ->sortByDesc('created_at')
+            ->values()
+            ->map(fn($m) => $this->mapTicketMessage($m))
+            : [];
 
         return [
             'id'                => $item->id,
@@ -260,7 +261,7 @@ class Remappers
             'type'              => $item->type ? Helpers::typeSlugToText($item->type) : null,
             'type_slug'         => $item->type ? $item->type : null,
             'project_id'        => $item->project?->id,
-            'project_bukukas_id'=> $item->project?->project_bukukas_id,
+            'project_bukukas_id' => $item->project?->project_bukukas_id,
             'project_name'      => $item->project?->bukukas?->item?->title,
             'reporter_user_id' => $item->reporterUser?->id,
             'reporter_name'    => $item->reporterUser?->name,
@@ -268,12 +269,12 @@ class Remappers
             'assigned_name'    => $item->assignedUser?->name,
             'created_at'        => $item->created_at,
             'created_at_format' => $item->created_at
-                                    ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s')
-                                    : null,
+                ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s')
+                : null,
             'updated_at'        => $item->updated_at,
             'updated_at_format' => $item->updated_at
-                                    ? Carbon::parse($item->updated_at)->locale('id')->translatedFormat('d F Y H:i:s')
-                                    : null,
+                ? Carbon::parse($item->updated_at)->locale('id')->translatedFormat('d F Y H:i:s')
+                : null,
             'attachments'       => $attachments,
             'messages'       => $messages,
         ];
@@ -282,10 +283,9 @@ class Remappers
     public function remapTickets($projects)
     {
         // try {
-            return collect($projects)->map(fn($item) => $this->mapTicketItem($item));
+        return collect($projects)->map(fn($item) => $this->mapTicketItem($item));
         // } catch (\Throwable $e) {
         //     dd($e->getMessage(), $e->getLine());
         // }
     }
-
 }
