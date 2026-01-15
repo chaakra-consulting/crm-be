@@ -78,6 +78,21 @@ return [
             'strict' => true,
             'engine' => null,
         ],
+        'sdm' => [
+            'driver' => env('DB_SDM_CONNECTION', 'mysql'),
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_SDM_HOST', '127.0.0.1'),
+            'port' => env('DB_SDM_PORT', '3306'),
+            'database' => env('DB_SDM_DATABASE', 'forge'),
+            'username' => env('DB_SDM_USERNAME', 'forge'),
+            'password' => env('DB_SDM_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
 
         'mariadb' => [
             'driver' => 'mariadb',

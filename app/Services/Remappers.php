@@ -207,7 +207,7 @@ class Remappers
             'is_active'           => $local?->is_active,
 
 
-            "status"               => "proses",
+            "status"               => $local->status,
             "progress"             => $local?->progress,
             'invoice_total_summary' => $invoiceTotalSummary,
             'payments'              => $payments,

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\SDMProjectPerusahaan;
+use App\Models\SDMTask;
+use App\Models\SDMTipeTask;
+use App\Models\SDMUserTask;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
@@ -29,9 +33,9 @@ class TicketController extends Controller
         $reporterUserId = $roleSlug == 'pic-customer' ? $auth->id : null;
         $assignedUserId = $roleSlug == 'pic-project' ? $auth->id : null;
         $tickets = Ticket::byReporterId($reporterUserId)
-                        ->byAssignedId($assignedUserId)
-                        ->latest()
-                        ->get();
+            ->byAssignedId($assignedUserId)
+            ->latest()
+            ->get();
 
         $remapper = new Remappers();
         $remapTickets = $remapper->remapTickets($tickets);
@@ -67,6 +71,7 @@ class TicketController extends Controller
         try {
 
             $userId = Auth::id();
+            //get pic of project
             $ticketNumber = Helpers::generateTicketNumber();
 
             $ticket = Ticket::create([
@@ -101,7 +106,6 @@ class TicketController extends Controller
                 'message' => 'Tiket berhasil dibuat',
                 'data'    => $ticket,
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -128,8 +132,8 @@ class TicketController extends Controller
             $userId = Auth::id();
 
             $ticket = Ticket::findOrFail($id);
-            if($ticket->status == 'closed') {
-                $ticket->update(['status'=>'on-progress']);
+            if ($ticket->status == 'closed') {
+                $ticket->update(['status' => 'on-progress']);
             }
             // elseif($ticket->status == 'on-progress' && $ticket->reporter_user_id == $userId){
             //     $ticket->update(['status'=>'customer-reply']);
@@ -164,7 +168,6 @@ class TicketController extends Controller
                 'message' => 'Jawaban berhasil dikirim',
                 'data'    => $ticketMessage,
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -200,7 +203,6 @@ class TicketController extends Controller
                 'message' => 'Tiket berhasil diupdate.',
                 'data'    => $ticket,
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -244,7 +246,6 @@ class TicketController extends Controller
                 'message' => 'Tiket berhasil diupdate.',
                 'data'    => $ticket,
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -272,7 +273,7 @@ class TicketController extends Controller
 
             $ticket = Ticket::findOrFail($id);
 
-            if($request->approval == 'approved') {
+            if ($request->approval == 'approved') {
                 $newStatus = 'on-progress';
             } else {
                 $newStatus = 'rejected';
@@ -304,22 +305,25 @@ class TicketController extends Controller
                     throw new \Exception('User belum diintegrasikan dengan Sistem SDM.');
                 }
 
-                $response = Http::post(
-                    config('services.sdm.url') . '/tasks/store',
-                    [
-                        'user_id'            => $user->sdm_user_id,
-                        'tipe_task'          => 'task-project',
-                        'project_bukukas_id' => $project->project_bukukas_id,
-                        'nama_task'          => 'Helpdesk Complaint CRM - ' . $ticket->title,
-                        'keterangan'         => $ticket->description, // ubah kolom tasks di sdm jadi teks supaya char nya bisa banyak
-                        'tgl_task'           => now()->toDateString(),
-                        'deadline_task'      => now()->addDays(2)->toDateString(),
-                    ]
-                );
 
-                if (! $response->successful()) {
-                    throw new \Exception('Gagal membuat task complaint di SDM');
-                }
+
+                // $response = Http::post(
+                //     config('services.sdm.url') . '/tasks/store',
+                $data = [
+                    'user_id'            => $user->sdm_user_id,
+                    'tipe_task'          => 'task-project',
+                    'project_bukukas_id' => $project->project_bukukas_id,
+                    'nama_task'          => 'Helpdesk Complaint CRM - ' . $ticket->title,
+                    'keterangan'         => $ticket->description, // ubah kolom tasks di sdm jadi teks supaya char nya bisa banyak
+                    'tgl_task'           => now()->toDateString(),
+                    'deadline_task'      => now()->addDays(2)->toDateString(),
+                ];
+                $this->saveTaskToSDM($data);
+                // );
+
+                // if (! $response->successful()) {
+                //     throw new \Exception('Gagal membuat task complaint di SDM');
+                // }
             }
 
 
@@ -329,7 +333,6 @@ class TicketController extends Controller
                 'message' => 'Tiket berhasil diupdate.',
                 'data'    => $ticket,
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -339,5 +342,34 @@ class TicketController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function saveTaskToSDM($data)
+    {
+        $user = User::find($data['user_id']);
+        $project = SDMProjectPerusahaan::where('ref_bukukas_id', $data['project_bukukas_id'])->first();
+
+        if (! $project) {
+            return response()->json(['message' => 'Project tidak ditemukan'], 404);
+        }
+
+        $tipeTask = SDMTipeTask::where('slug', $data['tipe_task'])->first()
+            ?? SDMTipeTask::where('slug', 'task-project')->first();
+
+        $task = SDMTask::create([
+            'tipe_tasks_id' => $tipeTask->id ?? null,
+            'project_perusahaan_id' => $project->id,
+            'tgl_task' => $data['tgl_task'],
+            'deadline' => $data['deadline_task'],
+            'status' => 'proses',
+            'user_id' => $user->id,
+            'nama_task' => $data['nama_task'],
+            'keterangan' => $data['keterangan'],
+        ]);
+
+        SDMUserTask::create([
+            'task_id' => $task->id,
+            'user_id' => $user->id,
+        ]);
     }
 }

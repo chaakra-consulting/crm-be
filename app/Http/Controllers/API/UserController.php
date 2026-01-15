@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\SDMProjectPerusahaan;
+use App\Models\SDMUserProject;
 use App\Models\User;
 use App\Services\Helpers;
 use App\Services\Remappers;
@@ -21,7 +23,7 @@ use Illuminate\Support\Facades\Http;
 
 class UserController extends Controller
 {
-     /**
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request): JsonResponse
@@ -33,13 +35,13 @@ class UserController extends Controller
 
             $start = Carbon::createFromFormat('d/m/Y', $startFormatted)->startOfDay();
             $end   = Carbon::createFromFormat('d/m/Y', $endFormatted)->endOfDay();
-        }else{
+        } else {
             $start = null;
             $end = null;
         }
 
         $users = User::filterRoles($request->roles)
-            ->filterDateRange($start,$end)
+            ->filterDateRange($start, $end)
             ->get();
 
         $remapper = new Remappers();
@@ -143,7 +145,6 @@ class UserController extends Controller
                 'message' => 'User created successfully.',
                 'data' => $user
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -196,7 +197,6 @@ class UserController extends Controller
                 'message' => 'User updated successfully.',
                 'data' => $user
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -230,7 +230,6 @@ class UserController extends Controller
                 'message' => 'User updated successfully.',
                 'data' => $user
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -267,7 +266,6 @@ class UserController extends Controller
                 'message' => 'User updated successfully.',
                 'data' => $user
             ], 201);
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -292,11 +290,12 @@ class UserController extends Controller
     public function indexUserSDM(Request $request): JsonResponse
     {
         try {
-            $response = Http::get(config('services.sdm.url').'/users/index');
+            $response = Http::get(config('services.sdm.url') . '/users/index');
 
             if (!$response->successful()) {
                 return response()->json([
                     'message' => 'Gagal mengambil data user dari API SDM',
+                    "detail" => $response->status()
                 ], $response->status());
             }
 
@@ -314,24 +313,23 @@ class UserController extends Controller
     {
         $bukukasProjectId = $request->bukukas_project_id;
 
-        $url = config('services.sdm.url') . '/users/index';
+        $sdmProject = SDMProjectPerusahaan::where('ref_bukukas_id', '=', $bukukasProjectId)->first();
+        $userProject = SDMUserProject::where('project_perusahaan_id', '=', $sdmProject->id)->get();
 
-        $response = Http::get($url, [
-            'bukukas_project_id' => $bukukasProjectId,
-        ]);
-
-        if (! $response->successful()) {
+        if (!$sdmProject) {
             return response()->json([
-                'message' => 'Gagal mengambil data user dari SDM',
-            ], $response->status());
+                'message' => 'Bukukas project tidak ditemukan',
+            ], 404);
         }
 
-        $sdmUserIds = collect($response->json())
-            ->pluck('id')
+        $sdmUserIds = collect($userProject)
+            ->pluck('user_id')
             ->filter()
             ->unique()
             ->values()
             ->toArray();
+
+        // dd($sdmUserIds);
 
         $users = User::whereIn('sdm_user_id', $sdmUserIds)->get();
 

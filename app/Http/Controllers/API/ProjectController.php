@@ -116,7 +116,6 @@ class ProjectController extends Controller
                     'penjualan'         => '',
                     'amount'            => 0,
                     'residual'          => 0,
-                    'residual'          => 0,
                     'dikirim'           => '',
                     'tgl_dikirim'       => Carbon::now(),
                     'keterangan'        => '',
