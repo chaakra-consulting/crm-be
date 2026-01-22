@@ -11,6 +11,7 @@ use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\FileController;
+use App\Http\Controllers\LeadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -105,3 +106,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users/index-sdm', [UserController::class, 'indexUserSDM'])->name('users.index_sdm');
     Route::get('/users/index-user-project', [UserController::class, 'indexUserFromUserSDMByBukukasProject'])->name('users.index_from_sdm_by_bukukas_project');
 });
+
+//Leads
+Route::resource('leads', LeadController::class);
+Route::get('ticket/project/{project_id}', [ProjectController::class, 'get_tickets']);

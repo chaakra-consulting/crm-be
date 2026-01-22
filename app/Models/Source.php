@@ -27,4 +27,9 @@ class Source extends Model
     {
         return $this->hasMany(Contact::class);
     }
+
+    function lead()
+    {
+        return $this->hasMany(Lead::class);
+    }
 }

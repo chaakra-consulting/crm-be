@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\ProjectBukukas;
 use App\Models\ProjectItemsBukukas;
+use App\Models\Ticket;
 use App\Services\Helpers;
 use App\Services\Remappers;
+use App\Traits\ResponseFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -20,6 +22,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
+    use ResponseFactory;
     /**
      * Display a listing of the resource.
      */
@@ -274,5 +277,16 @@ class ProjectController extends Controller
                 'error'   => $e->getMessage(),
             ], 500);
         }
+    }
+
+    function get_tickets(Request $request, $project_id)
+    {
+        $sort_by = $request->sort_by ?? 'asc';
+        $tickets = Ticket::with(['allAttachments', 'messages', 'reporterUser'])->where('project_id', $project_id);
+        if ($sort_by == 'asc' || $sort_by == 'desc') {
+            $tickets = $tickets->orderBy('created_at', $sort_by);
+        }
+        $tickets = $tickets->get();
+        return $this->successResponseData("Tickets Data", $tickets);
     }
 }
