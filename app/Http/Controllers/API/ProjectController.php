@@ -282,7 +282,7 @@ class ProjectController extends Controller
     function get_tickets(Request $request, $project_id)
     {
         $sort_by = $request->sort_by ?? 'asc';
-        $tickets = Ticket::with(['allAttachments', 'messages', 'reporterUser'])->where('project_id', $project_id);
+        $tickets = Ticket::with(['attachments', 'messages', 'reporterUser'])->where('project_id', $project_id);
         if ($sort_by == 'asc' || $sort_by == 'desc') {
             $tickets = $tickets->orderBy('created_at', $sort_by);
         }
