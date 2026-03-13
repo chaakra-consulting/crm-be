@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\ProjectBukukas;
+use App\Models\Survey;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -64,7 +66,7 @@ class Helpers
     public static function tagsColorTextToColor($text = null)
     {
         if ($text === null) {
-            $map = ['Dasar','Nila','Teal', 'Oranye','Pink','Ungu','Hijau','Merah','Kuning','Biru','Gelap'];
+            $map = ['Dasar', 'Nila', 'Teal', 'Oranye', 'Pink', 'Ungu', 'Hijau', 'Merah', 'Kuning', 'Biru', 'Gelap'];
             $randomKey = array_rand($map);
             $text = $map[$randomKey];
         }
@@ -133,7 +135,7 @@ class Helpers
         // elseif ($bentuk == 'FIRMA')
         //     return "09";
         // elseif ($bentuk == 'UD')
-            // return "10";
+        // return "10";
         else return "0";
     }
 
@@ -186,7 +188,7 @@ class Helpers
         $result->payment_subtotal_termin_no_pph = round($result->payment_subtotal_termin * $factorPPH);
 
         if ($invoice->potongan) {
-            $result->payment_total_termin_no_ppn_with_pph = round($result->payment_subtotal_termin / (1 + ($result->tax_percentage/100) + ($invoice->potongan/100)), 0);
+            $result->payment_total_termin_no_ppn_with_pph = round($result->payment_subtotal_termin / (1 + ($result->tax_percentage / 100) + ($invoice->potongan / 100)), 0);
             $result->payment_pph_termin_no_ppn_with_pph = round($result->payment_total_termin_no_ppn_with_pph * ($invoice->potongan / 100), 0);
             $result->payment_ppn_termin_no_ppn_with_pph = round($result->payment_total_termin_no_ppn_with_pph * ($result->tax_percentage / 100), 0);
         } else {
@@ -320,5 +322,22 @@ class Helpers
         return round($bytes / pow(1024, $power), 2) . ' ' . $units[$power];
     }
 
+    public static function generateSurveyNumber()
+    {
+        $date = Carbon::now()->format('Ymd');
 
+        $lastTicket = Survey::whereDate('created_at', Carbon::today())
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $lastNumber = 0;
+
+        if ($lastTicket && preg_match('/(\d+)$/', $lastTicket->ticket_number, $matches)) {
+            $lastNumber = (int) $matches[1];
+        }
+
+        $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+
+        return "SV-{$date}-{$nextNumber}";
+    }
 }

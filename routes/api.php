@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\API\AdminSurveyController;
+use App\Http\Controllers\API\AdminSurveyDetailController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CityController;
 use App\Http\Controllers\API\CompanyController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\FileController;
+use App\Http\Controllers\API\SurveyController;
 use App\Http\Controllers\LeadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,8 +39,17 @@ Route::get('/users/show/{id?}', [UserController::class, 'show'])->name('users.sh
 Route::put('/users/activate-account/{id}', [UserController::class, 'activateAccount'])->name('users.activate_account');
 
 Route::get('project/list', [ProjectController::class, 'projectList'])->name('projects.list');
+//file
+Route::get('/stream/{path}', [FileController::class, 'stream'])->where('path', '.*');
+Route::get('/download/{path}', [FileController::class, 'download'])->where('path', '.*');
 
 Route::middleware(['auth:sanctum'])->group(function () {
+
+    //Survey
+    Route::resource('survey', AdminSurveyController::class);
+    Route::post('survey-questions/reorder', [AdminSurveyDetailController::class, 'reorderOrder']);
+    Route::get('survey-question/{id}', [AdminSurveyDetailController::class, 'index'])->name('admin.survey.questions.index');
+    Route::resource('survey-question', AdminSurveyDetailController::class)->except(['index']);
 
     //cities
     Route::get('/cities', [CityController::class, 'index'])->name('contacts.index');
@@ -57,9 +69,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/companies/update/{id}', [CompanyController::class, 'update'])->name('companies.update');
     Route::delete('/companies/delete/{id}', [CompanyController::class, 'destroy'])->name('companies.destroy');
 
-    //file
-    Route::get('/stream/{path}', [FileController::class, 'stream'])->where('path', '.*');
-    Route::get('/download/{path}', [FileController::class, 'download'])->where('path', '.*');
 
     //provinces
     Route::get('/provinces', [ProvinceController::class, 'index'])->name('contacts.index');

@@ -24,6 +24,8 @@ class User extends Authenticatable
         'photo',
     ];
 
+    protected $with = ['role'];
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -75,5 +77,10 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    function survey()
+    {
+        return $this->hasMany(Survey::class);
     }
 }

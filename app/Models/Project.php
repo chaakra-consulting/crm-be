@@ -39,4 +39,9 @@ class Project extends Model
     {
         return $this->belongsTo(User::class, 'pic_company_user_id');
     }
+
+    function survey()
+    {
+        return $this->hasMany(Survey::class);
+    }
 }

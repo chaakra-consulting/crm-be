@@ -127,13 +127,9 @@ class Remappers
             'is_password'       => $item->password ? true : false,
             'is_active'         => $item->is_active,
             'is_active_text'    => $item->is_active ? 'Aktif' : 'Tidak Aktif',
-            'photo_path'        => $item->photo ? asset('storage/' . $item->photo) : null,
-            'photo_url'         => $item->photo ? url('storage/' . $item->photo) : null,
             "photo"             => $item->photo ? url('storage/' . $item->photo) : null,
             'created_at'        => $item->created_at,
-            'created_at_format' => $item->created_at ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
             'updated_at'        => $item->updated_at,
-            'updated_at_format' => $item->updated_at ? Carbon::parse($item->updated_at)->locale('id')->translatedFormat('d F Y H:i:s') : null,
         ];
     }
 
