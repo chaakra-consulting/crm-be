@@ -36,6 +36,8 @@ class AdminSurveyDetailController extends Controller
     public function store(SurveyQuestionRequest $surveyQuestionRequest)
     {
         $validatedData = $surveyQuestionRequest->validated();
+        $order_number = SurveyQuestion::where('survey_id', $validatedData['survey_id'])->max('order_number');
+        $validatedData['order_number'] = $order_number + 1;
         DB::beginTransaction();
         try {
             SurveyQuestion::create($validatedData);

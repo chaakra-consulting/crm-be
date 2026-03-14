@@ -24,7 +24,7 @@ class SurveyQuestionRequest extends FormRequest
         return [
             'survey_id' => 'required|exists:surveys,id',
             'question' => 'required|string',
-            'order_number' => 'required|integer',
+            'order_number' => 'nullable|integer',
             'description' => 'nullable|string',
         ];
     }
