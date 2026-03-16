@@ -47,6 +47,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //Survey
     Route::resource('survey', AdminSurveyController::class);
+    Route::post('survey-questions/answer/{id}', [AdminSurveyDetailController::class, 'sendAnswer']);
     Route::post('survey-questions/reorder', [AdminSurveyDetailController::class, 'reorderOrder']);
     Route::get('survey-question/{id}', [AdminSurveyDetailController::class, 'index'])->name('admin.survey.questions.index');
     Route::resource('survey-question', AdminSurveyDetailController::class)->except(['index']);

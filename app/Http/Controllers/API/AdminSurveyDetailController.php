@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SurveyQuestionRequest;
+use App\Models\Survey;
+use App\Models\SurveyAnswer;
 use App\Models\SurveyQuestion;
 use App\Traits\ResponseFactory;
 use Exception;
@@ -128,6 +130,39 @@ class AdminSurveyDetailController extends Controller
                 'message' => 'Failed to update order. Please try again.',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    function sendAnswer(Request $request, $surveyId)
+    {
+        $request->validate([
+            'answers' => 'required|array',
+        ]);
+        try {
+            DB::beginTransaction();
+            $answersData = [];
+
+
+            foreach ($request->answers as $questionId => $answerText) {
+                $answersData[] = [
+                    'survey_id' => $surveyId,
+                    'survey_question_id' => $questionId,
+                    'answer' => $answerText,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            SurveyAnswer::insert($answersData);
+
+            //set to answered
+            Survey::find($surveyId)->update(['status' => 'answered']);
+
+            DB::commit();
+            return $this->successResponse("Data berhasil ditambahkan");
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->internalErrorResponse($th->getMessage());
         }
     }
 }

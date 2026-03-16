@@ -18,12 +18,16 @@ class AdminSurveyController extends Controller
      */
     public function index()
     {
-        $survey = Survey::with(['project.bukukas.item'])->get();
-        $slug = auth('sanctum')->user()->role->slug;
-        if ($slug != 'admin') {
-            return $this->internalErrorResponse("Unauthorized access.", 403);
+        $auth = auth('sanctum')->user();
+        $slug = $auth->role_id;
+        if ($slug == 7) {
+            $survey = Survey::with(['project.bukukas.item'])->where('project_pic', '=', $auth->id)->get();
+            return $this->successResponseData("Survey Data PIC", $survey);
+        } else {
+            $survey = Survey::with(['project.bukukas.item'])->get();
+            return $this->successResponseData("Survey Data", $survey);
+
         }
-        return $this->successResponseData("Survey Data", $survey);
     }
 
     /**
