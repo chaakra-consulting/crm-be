@@ -22,7 +22,10 @@ class OfferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => 'required',
+            'message' => 'required',
+            'leads_id'=> 'required|exists:leads,id',
+            
         ];
     }
 }

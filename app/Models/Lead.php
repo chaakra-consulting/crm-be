@@ -12,4 +12,8 @@ class Lead extends Model
     {
         return $this->belongsTo(Source::class, 'ad_source');
     }
+    function offers()
+    {
+        return $this->hasMany(Offer::class, 'leads_id');
+    }
 }
